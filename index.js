@@ -11,17 +11,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
   axios("https://finance.yahoo.com/quote/%5ENSEI/history?p=%5ENSEI")
-    .then((response) => {
-      const html = response.data;
-      // console.log(html);
-      const $ = cheerio.load(html);
+    .then(async (response) => {
+      const html = await response.data;
+      const $ = await cheerio.load(html);
       const articles = [];
 
       $(".BdT", html).each(function () {
-        //<-- cannot be a function expression
-        const data = $(this).find("td").find("span")[0].children[0].data;
+        const date = $(this).find("td").find("span")[0].children[0].data;
         const open = $(this).find("td").find("span")[1].children[0].data;
         const high = $(this).find("td").find("span")[2].children[0].data;
         const low = $(this).find("td").find("span")[3]?.children[0].data;
@@ -29,7 +27,7 @@ app.get("/", (req, res) => {
         const adj_close = $(this).find("td").find("span")[5]?.children[0].data;
         const volume = $(this).find("td").find("span")[6]?.children[0].data;
         articles.push({
-          data,
+          date,
           open,
           high,
           low,
